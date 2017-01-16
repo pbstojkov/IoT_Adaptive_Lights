@@ -1,11 +1,3 @@
-#-------------------------------------------------------------------------------
-# File Name : ClientProc.py
-# Purpose   : Contains the Client Proc
-# Author    : Sri Muthu Narayanan Balasubramanian
-# Created   : 8 Jan 2016
-# Copyright :
-#-------------------------------------------------------------------------------
-
 import sys, os, time
 import subprocess
 import re
@@ -20,12 +12,19 @@ clientPath = "./lwm2mclient"
 INIT_RATE = 0.01
 
 #Search constants
+SEARCH_LIGHT_STATE = '[light_state]'
+SEARCH_SENSOR_STATE = '[sensor_state]'
+SEARCH_USER_TYPE = '[user_type]'
+SEARCH_USER_ID = '[user_id]'
+SEARCH_LIGHT_COLOR = '[light_color]'
+SEARCH_LOW_LIGHT = '[low_light]'
 SEARCH_GROUP_NO = '[group_no]'
 SEARCH_LOCATION_X = '[location_x]'
 SEARCH_LOCATION_Y = '[location_y]'
 SEARCH_ROOM_ID = '[room_id]'
+SEARCH_BEHAVIOR_DEPLOYMENT = '[behavior_deployment]'
 SEARCH_OWNERSHIP = '[ownership_priority]'
-
+SEARCH_LIGHT_BEHAVIOR = '[light_behavior]'
 
 #String definitions
 OCCUPIED = "OCCUPIED"
