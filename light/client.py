@@ -6,6 +6,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 # from picamera import PiCamera
 from collections import deque
 from functools import reduce
+from general import WakaamaProc
 import math
 import argparse
 import time
