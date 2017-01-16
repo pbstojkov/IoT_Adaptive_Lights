@@ -4,7 +4,6 @@ from general import * # AvahiDiscovery, WakaamaProc, ownership
 # from multiprocessing import Process
 # import thread, time
 
-
 if __name__ == "__main__":
 	ROOM = 1
     BROKER_ADDRESS = AvahiDiscovery.find_broker(ROOM)
