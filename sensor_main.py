@@ -1,12 +1,17 @@
+from __future__ import absolute_import, division, print_function, unicode_literals
 from sensor import *
-import thread, time
-from multiprocessing import Process
+from general import * # AvahiDiscovery, WakaamaProc, ownership
+# from multiprocessing import Process
+# import thread, time
 
 
 if __name__ == "__main__":
+	ROOM = 1
+    BROKER_ADDRESS = AvahiDiscovery.find_broker(ROOM)
+    # print(BROKER_ADDRESS)
 	# BROKER_ADDRESS = "iot.eclipse.org"
 	# BROKER_ADDRESS = "192.168.0.104"
-	BROKER_ADDRESS = "192.168.43.37"
+	# BROKER_ADDRESS = "192.168.43.37"
 	PORT = 1883
 	KEEPALIVE = 60
 	ph = client.pahoHandler()
