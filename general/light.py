@@ -5,27 +5,27 @@ class Light:
         self.X = [255, 0, 0]  # Red
         self.O = [255, 255, 255]  # White
         self.sketch = [
-            self.O, self.O, self.O, self.O, self.O, self.O, self.O, self.O,
-            self.O, self.X, self.X, self.O, self.O, self.X, self.X, self.O,
-            self.O, self.X, self.X, self.O, self.O, self.X, self.X, self.O,
-            self.O, self.O, self.O, self.O, self.O, self.O, self.O, self.O,
-            self.O, self.O, self.O, self.O, self.O, self.O, self.O, self.O,
             self.X, self.X, self.X, self.X, self.X, self.X, self.X, self.X,
             self.X, self.X, self.X, self.X, self.X, self.X, self.X, self.X,
-            self.X, self.O, self.X, self.O, self.O, self.X, self.O, self.X
+            self.X, self.X, self.X, self.X, self.X, self.X, self.X, self.X,
+            self.X, self.X, self.X, self.X, self.X, self.X, self.X, self.X,
+            self.X, self.X, self.X, self.X, self.X, self.X, self.X, self.X,
+            self.X, self.X, self.X, self.X, self.X, self.X, self.X, self.X,
+            self.X, self.X, self.X, self.X, self.X, self.X, self.X, self.X,
+            self.X, self.X, self.X, self.X, self.X, self.X, self.X, self.X
         ]
         self.sense = SenseHat()
 
     def update_sketch(self):
         self.sketch = [
-            self.O, self.O, self.O, self.O, self.O, self.O, self.O, self.O,
-            self.O, self.X, self.X, self.O, self.O, self.X, self.X, self.O,
-            self.O, self.X, self.X, self.O, self.O, self.X, self.X, self.O,
-            self.O, self.O, self.O, self.O, self.O, self.O, self.O, self.O,
-            self.O, self.O, self.O, self.O, self.O, self.O, self.O, self.O,
             self.X, self.X, self.X, self.X, self.X, self.X, self.X, self.X,
             self.X, self.X, self.X, self.X, self.X, self.X, self.X, self.X,
-            self.X, self.O, self.X, self.O, self.O, self.X, self.O, self.X
+            self.X, self.X, self.X, self.X, self.X, self.X, self.X, self.X,
+            self.X, self.X, self.X, self.X, self.X, self.X, self.X, self.X,
+            self.X, self.X, self.X, self.X, self.X, self.X, self.X, self.X,
+            self.X, self.X, self.X, self.X, self.X, self.X, self.X, self.X,
+            self.X, self.X, self.X, self.X, self.X, self.X, self.X, self.X,
+            self.X, self.X, self.X, self.X, self.X, self.X, self.X, self.X
         ]
     def change_color(self, r , g, b):
         self.X = [int(r), int(g), int(b)]
@@ -36,7 +36,7 @@ class Light:
         self.sense.low_light = intensity
 
 my_light = Light()
-my_light.change_color(0, 255, 0)
+my_light.change_color(255, 0, 0)
 
 
 
@@ -52,14 +52,14 @@ my_light.change_color(0, 255, 0)
 #     #bla bla
 #     # sense.show_message("R2D2 was here")
 #     question_mark = [
-#     O, O, O, O, O, O, O, O,
-#     O, X, X, O, O, X, X, O,
-#     O, X, X, O, O, X, X, O,
-#     O, O, O, O, O, O, O, O,
-#     O, O, O, O, O, O, O, O,
-#     O, X, X, X, X, X, X, O,
-#     O, X, X, X, X, X, X, O,
-#     O, O, O, O, O, O, O, O
+#     X, X, X, X, X, X, X, X,
+#     X, X, X, X, X, X, X, X,
+#     X, X, X, X, X, X, X, X,
+#     X, X, X, X, X, X, X, X,
+#     X, X, X, X, X, X, X, X,
+#     X, X, X, X, X, X, X, X,
+#     X, X, X, X, X, X, X, X,
+#     X, X, X, X, X, X, X, O
 #     ]
 #     sense.low_light = True
 #     sense.set_pixels(question_mark)
