@@ -1,7 +1,7 @@
 # python3
 from __future__ import absolute_import, division, print_function, unicode_literals
-from pyimagesearch.facedetector import FaceDetector
-from pyimagesearch import imutils
+from sensor.pyimagesearch.facedetector import FaceDetector
+from sensor.pyimagesearch import imutils
 from picamera.array import PiRGBArray
 from picamera import PiCamera
 from collections import deque
@@ -160,7 +160,7 @@ class pahoHandler:
         ap.add_argument("-v", "--video",
                         help="path to the (optional) video file")
         args = vars(ap.parse_args())
-        dict_face = {'video': None, 'face': 'cascades/haarcascade_frontalface_default.xml'}
+        dict_face = {'video': None, 'face': 'sensor/cascades/haarcascade_frontalface_default.xml'}
         # print('Type: ', type(args))
         # print('Args has: ', args)
 
