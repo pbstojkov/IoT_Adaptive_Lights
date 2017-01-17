@@ -4,12 +4,12 @@ import re
 from sense_hat import SenseHat
 from evdev import InputDevice, list_devices, ecodes
 # from nbstreamreader import NonBlockingStreamReader as NBSR
-import ownership
-import light
+from ownership import *
+from light import *
 # from Error import *
 
-sensor_clientPath = "general/sensor_lwm2mclient"
-light_clientPath = "general/light_lwm2mclient"
+sensor_clientPath = "./sensor_lwm2mclient"
+light_clientPath = "./light_lwm2mclient"
 
 #Constants
 INIT_RATE = 0.01
@@ -72,7 +72,7 @@ class Wakaama_Sensor():
         print self.__host
         
         try:
-            self.__cProc = subprocess.Popen([sensor_clientPath,"-h",str(self.__host)],stdout=subprocess.PIPE,stdin=subprocess.PIPE,stderr=subprocess.PIPE)
+            self.__cProc = subprocess.Popen([sensor_clientPath,"-h",str(self.__host)],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
         except:
             return False
 
@@ -90,9 +90,9 @@ class Wakaama_Sensor():
         # while not self.__Exit:
         # for line in iter(self.__stdout.readline, ""):
         for line in iter(self.__cProc.stdout.readline, ""):           
-            __Read_Input_line(line)
+            self.__Read_Input_line(line)
 
-        self.__stdout.close()
+        self.__cProc.stdout.close()
         return_code = self.__cProc.wait()
         if return_code:
             raise subprocess.CalledProcessError(return_code, cmd)
@@ -153,33 +153,56 @@ class Wakaama_Light:
         self.__persons.load_json('https://iot-test.000webhostapp.com/OwnershipPriority.json')
 
     def __Start_Client_Process(self):
+        # print type(self.__host)
         print self.__host
         
         try:
-            self.__cProc = subprocess.Popen([light_clientPath,"-h",str(self.__host)],stdout=subprocess.PIPE,stdin=subprocess.PIPE,stderr=subprocess.PIPE)
+            self.__cProc = subprocess.Popen([light_clientPath, "-4" , "-h", self.__host], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE)
         except:
+            print "Fail"
             return False
 
         # self.__input = self.__cProc.stdin
-        self.__stdout = NBSR(self.__cProc.stdout)       
+        # self.__stdout = NBSR(self.__cProc.stdout)       
         # print Error.ClientInitSuccess
         time.sleep(2)
         return True
+
+    def __WTF(self):
+        for stdout_line in iter(self.__cProc.stdout.readline, ""):
+            yield stdout_line
 
     def Main_Client_Process(self):
         if not self.__Start_Client_Process():
             return False
 
-        for line in iter(self.__cProc.stdout.readline, ""):           
-        # for line in iter(self.__stdout.readline, ""):        
-            __Read_Input_line(line)
+        # for line in iter(self.__cProc.stdout.readline, ""):           
+        # # for line in iter(self.__stdout.readline, ""):        
+        #     print("bs" + line)
+        #     self.__Read_Input_line(line)
 
-        self.__stdout.close()
+        # while not self.__Exit:
+        #     line = self.__cProc.stdout.readline()
+        #     # print("bs: " + line)
+        #     if line != '':
+        #         # print(line)
+        #         self.__Read_Input_line(line)
+
+        for line in self.__WTF():
+            # bs = self.__cProc.stdout.readline(100)
+            # print "bs = {" + bs + "}"
+            self.__Read_Input_line(line)
+
+        print("WTF!?!?!?")
+        # self.__cProc.stdout.close()
         return_code = self.__cProc.wait()
         if return_code:
-            raise subprocess.CalledProcessError(return_code, cmd)
+            print(return_code)
+            return False
+            # raise subprocess.CalledProcessError(return_code, cmd)
 
     def __Read_Input_line(self, line):
+        print "reading .. [" + line + "]"
         if SEARCH_LIGHT_COLOR in line:
             colors = line.split(',')
             self.__light.change_color(colors[1][1:], colors[2], colors[3][:-1])
@@ -262,3 +285,12 @@ class Wakaama_Light:
     def Kill_Client_Process(self):
         output = subprocess.check_output(["pkill","light_lwm2mclient"])
         print output
+
+
+if __name__ == "__main__":
+    import AvahiDiscovery
+    ROOM = 1
+    BROKER_ADDRESS = AvahiDiscovery.find_broker(ROOM)
+
+    wc = Wakaama_Light(BROKER_ADDRESS)
+    wc.Main_Client_Process()

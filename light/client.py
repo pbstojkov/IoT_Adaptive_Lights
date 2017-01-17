@@ -14,6 +14,7 @@ import time
 import paho.mqtt.client as mqtt
 import time
 import thread
+import re
 
 q = deque()
 Q_SIZE = 10
@@ -57,6 +58,7 @@ class pahoHandler:
         self.sensor_state = 'OCCUPIED'
         self.launch_thread = True
         sliding_init()
+        self.occupied_workers = []
 
 
     # The callback for when the client receives a CONNACK response from the server.
@@ -68,15 +70,23 @@ class pahoHandler:
         self.loop_flag_connected = True
 
     # The callback for when a PUBLISH message is received from the server.
-    def on_message(self, client1, userdata, message):
-        print("message received  ", str(message.payload.decode("utf-8")))
+    def on_message(self, client, userdata, message):
+        def get_name(x): return x.split('/')[3]
+
+        sender_device_id = get_name(str(message.topic.decode("utf-8")))
+        sender_msg = str(message.payload.decode("utf-8"))
+        if sender_msg == 'FREE' and sender_device_id in self.occupied_workers:
+            self.occupied_workers.remove(sender_device_id)
+        elif sender_msg == 'OCCUPIED' and sender_device_id not in self.occupied_workers:
+            self.occupied_workers.append(sender_device_id)
+        print('WORKERS LINE UP,  ', self.occupied_workers)
 
     def send_message(self):
         print('Sending message:')
         # client1.publish("TUE/Room-1/Sensor/Sensor-Device-1-1/State", "Occupied")
 
     def on_log(self, client, userdata, level, buf):
-        print("log: ", buf)
+        print("log11: ", buf)
 
     def on_subscribe(self, mqttc, obj, mid, granted_qos):
         print("Subscribed: " + str(mid) + " " + str(granted_qos))

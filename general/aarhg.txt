@@ -1,0 +1,7 @@
+Trying to bind LWM2M Client to port 56830
+Opening connection to server at 192.168.0.100:5683
+13 bytes received from [192.168.0.100]:5683
+64 41 AA 9F  9F AA BA 9B  82 72 64 01  30  dA.......rd.0
+32 bytes received from [192.168.0.100]:5683
+44 03 9C D5  D5 9C D6 9B  B5 31 30 32  35 30 01 30   D........10250.0
+01 35 10 FF  28 31 30 2C  32 30 30 2C  31 30 30 29   .5..(10,200,100)
