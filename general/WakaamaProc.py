@@ -3,7 +3,7 @@ import subprocess
 import re
 from sense_hat import SenseHat
 from evdev import InputDevice, list_devices, ecodes
-from nbstreamreader import NonBlockingStreamReader as NBSR
+# from nbstreamreader import NonBlockingStreamReader as NBSR
 import ownership
 import light
 # from Error import *
@@ -77,7 +77,7 @@ class Wakaama_Sensor():
             return False
 
         # self.__input = self.__cProc.stdin
-        self.__stdout = NBSR(self.__cProc.stdout)       
+        # self.__stdout = NBSR(self.__cProc.stdout)       
         # print Error.ClientInitSuccess
         time.sleep(2)
         return True
@@ -88,8 +88,8 @@ class Wakaama_Sensor():
             return False
 
         # while not self.__Exit:
-        for line in iter(self.__stdout.readline, ""):
-        # for line in iter(self.__cProc.stdout.readline, ""):           
+        # for line in iter(self.__stdout.readline, ""):
+        for line in iter(self.__cProc.stdout.readline, ""):           
             __Read_Input_line(line)
 
         self.__stdout.close()
@@ -170,8 +170,8 @@ class Wakaama_Light():
         if not self.__Start_Client_Process():
             return False
 
-        # for line in iter(self.__cProc.stdout.readline, ""):           
-        for line in iter(self.__stdout.readline, ""):        
+        for line in iter(self.__cProc.stdout.readline, ""):           
+        # for line in iter(self.__stdout.readline, ""):        
             __Read_Input_line(line)
 
         self.__stdout.close()
