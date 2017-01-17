@@ -4,9 +4,12 @@ import re
 from sense_hat import SenseHat
 from evdev import InputDevice, list_devices, ecodes
 from nbstreamreader import NonBlockingStreamReader as NBSR
+import ownership
+import light
 # from Error import *
 
-clientPath = "./lwm2mclient"
+sensor_clientPath = "./sensor_lwm2mclient"
+light_clientPath = "./light_lwm2mclient"
 
 #Constants
 INIT_RATE = 0.01
@@ -35,7 +38,7 @@ USED = 'USED'
 LIGHT_STATE = "/10250/0/2"
 USER_TYPE = "/10250/0/3"
 USER_ID = "/10250/0/4"
-LGHT_COLOR = "/10250/0/5"
+LIGHT_COLOR = "/10250/0/5"
 LOW_LIGHT = "/10250/0/6"
 GROUP_NO = "/10250/0/7"
 LOCATION_X = "/10250/0/8"
@@ -54,25 +57,22 @@ ROOM_ID = "/10350/0/7"
 
 
 class Wakaama_Sensor():
-
     def __init__(self, host):
         self.__host = host
         self.__InitSuccess = False
         self.__Exit = False
         self.__sensor_state = FREE
-        # self.__persons = Persons() # todo add persons to this.
+        self.__group_no = 31
+        self.__location_x = 0.0
+        self.__location_y = 0.0
+        self.__room_id = ""
 
-    # def parse_json:
-    #   fill list __persons
-    
-    # def get_persons(self)
-    #   return the list.. or search for the person as a "find person function" ?
 
     def __Start_Client_Process(self):
         print self.__host
         
         try:
-            self.__cProc = subprocess.Popen([clientPath,"-h",str(self.__host)],stdout=subprocess.PIPE,stdin=subprocess.PIPE,stderr=subprocess.PIPE)
+            self.__cProc = subprocess.Popen([sensor_clientPath,"-h",str(self.__host)],stdout=subprocess.PIPE,stdin=subprocess.PIPE,stderr=subprocess.PIPE)
         except:
             return False
 
@@ -90,33 +90,28 @@ class Wakaama_Sensor():
         # while not self.__Exit:
         for line in iter(self.__stdout.readline, ""):
         # for line in iter(self.__cProc.stdout.readline, ""):           
-            __Read_Input(line)
+            __Read_Input_line(line)
 
         self.__stdout.close()
         return_code = self.__cProc.wait()
         if return_code:
             raise subprocess.CalledProcessError(return_code, cmd)
 
-    def __Read_Input(self, line):
-        if SEARCH_OWNERSHIP in line:
-            pass
-            # todo do something with this
+    def __Read_Input_line(self, line):
+        if SEARCH_SENSOR_STATE in line:
+            self.__sensor_state = line.split(',')[1]
+
         elif SEARCH_ROOM_ID in line:
-            pass
-            #todo this too
+            self.__room_id = line.split(',')[1]
+
         elif SEARCH_LOCATION_Y in line:
-            pass
+            self.__location_y = float(line.split(',')[1])
+
         elif SEARCH_LOCATION_X in line:
-            pass
+            self.__location_x = float(line.split(',')[1])
+
         elif SEARCH_GROUP_NO in line:
-            pass
-
-    # def __get_ownership_json(self):
-        # ...
-        # ...
-
-    # todo do setters for all variables in the class!!!
-    # each will not only change the variable but also push it to the wakaama client
+            self.__group_no = int(line.split(',')[1])
 
     def Set_Sensor_State(self, state):
         self.__sensor_state = state 
@@ -126,28 +121,9 @@ class Wakaama_Sensor():
         elif state == OCCUPIED:
             cmd = "change " + SENSOR_STATE + " " + state
             self.__cProc.stdin.write(cmd)
-    # def __Init_Rate(self):
-
-    #   cmd = CHANGE + " " + BILLING_RATE + " " + str(INIT_RATE)
-    #   print cmd
-    #   self.__cProc.stdin.write(cmd)
-
-
-    # def __Check_Reservation(self):
-
-    #   cmd = DUMP+" "+PARK_STATE+"\n"
-    #   self.__cProc.stdin.write(cmd)
-    #   tmp_output = self.__stdout.readline(0.01)
-    #   while not tmp_output.isspace():
-    #       if tmp_output.find(RESERVED)>=0:
-    #           self.__sense.clear(255,165,0)
-    #           self.__reserved=True
-    #           break
-    #       tmp_output = self.__stdout.readline(0.01)
-
 
     def Kill_Client_Process(self):
-        output = subprocess.check_output(["pkill","lwm2mclient"])
+        output = subprocess.check_output(["pkill","sensor_lwm2mclient"])
         print output
 
 
@@ -162,23 +138,25 @@ class Wakaama_Light():
         self.__Exit = False
 
         self.__light_state = FREE
+        self.__user_type = ""
+        self.__user_id = ""
         self.__light_color = "(0,0,0)"
         self.__low_light = False
-        self.__user_id = ""
-        self.__user_type = ""
-        # self.__persons = Persons() # todo add persons to this.
+        self.__group_no = 31
+        self.__location_x = 0.0
+        self.__location_y = 0.0
+        self.__room_id = ""
 
-    # def parse_json:
-    #   fill list __persons
-    
-    # def get_persons(self)
-    #   return the list.. or search for the person as a "find person function" ?
+        self.__light = Light()
+        self.__persons = Persons() 
+        #todo: delete below line, it is just a test !
+        self.__persons.load_json('https://iot-test.000webhostapp.com/OwnershipPriority.json')
 
     def __Start_Client_Process(self):
         print self.__host
         
         try:
-            self.__cProc = subprocess.Popen([clientPath,"-h",str(self.__host)],stdout=subprocess.PIPE,stdin=subprocess.PIPE,stderr=subprocess.PIPE)
+            self.__cProc = subprocess.Popen([light_clientPath,"-h",str(self.__host)],stdout=subprocess.PIPE,stdin=subprocess.PIPE,stderr=subprocess.PIPE)
         except:
             return False
 
@@ -189,69 +167,98 @@ class Wakaama_Light():
         return True
 
     def Main_Client_Process(self):
-
         if not self.__Start_Client_Process():
             return False
 
-        # while not self.__Exit:
-        for line in iter(self.__stdout.readline, ""):
         # for line in iter(self.__cProc.stdout.readline, ""):           
-            __Read_Input(line)
+        for line in iter(self.__stdout.readline, ""):        
+            __Read_Input_line(line)
 
         self.__stdout.close()
         return_code = self.__cProc.wait()
         if return_code:
             raise subprocess.CalledProcessError(return_code, cmd)
 
-    def __Read_Input(self, line):
-        if SEARCH_OWNERSHIP in line:
-            pass
-            # todo do something with this
+    def __Read_Input_line(self, line):
+        if SEARCH_LIGHT_COLOR in line:
+            colors = line.split(',')
+            self.__light.change_color(colors[1][1:], colors[2], colors[3][:-1])
+
+            self.__light_color = colors[1] + ',' + colors[2] + ',' + colors[3]
+            
+            self.__persons.find_user_id_change_values(self.__user_id, light_color=self.__light_color)
+
+        elif SEARCH_LOW_LIGHT in line:
+            ll = line.split(',')[1]
+            if "True" in ll:
+                self.__low_light = True
+            elif "False" in ll:
+                self.__low_light = False
+
+            self.__light.low_light(self.__low_light)
+
+            self.__persons.find_user_id_change_values(self.__user_id, low_light=self.__low_light)
+
+        elif SEARCH_OWNERSHIP in line:
+            url_ownership = line.split(',')[1]
+            self.__persons.load_json(url_ownership)
+
         elif SEARCH_ROOM_ID in line:
-            pass
-            #todo this too
+            self.__room_id = line.split(',')[1]
+
         elif SEARCH_LOCATION_Y in line:
-            pass
+            self.__location_y = float(line.split(',')[1])
+
         elif SEARCH_LOCATION_X in line:
-            pass
+            self.__location_x = float(line.split(',')[1])
+
         elif SEARCH_GROUP_NO in line:
-            pass
+            self.__group_no = int(line.split(',')[1])
 
-    # def __get_ownership_json(self):
-        # ...
-        # ...
+        elif SEARCH_LIGHT_STATE in line:
+            self.__light_state = line.split(',')[1]
 
-    # todo do setters for all variables in the class!!!
-    # each will not only change the variable but also push it to the wakaama client
+        elif SEARCH_USER_TYPE in line:
+            self.__user_type = line.split(',')[1]
 
-    def Set_Sensor_State(self, state):
-        self.__light_state = state 
-        if state == FREE: 
-            cmd = "change " + LIGHT_STATE + " " + state
-            self.__cProc.stdin.write(cmd)
-        elif state == USED:
-            cmd = "change " + LIGHT_STATE + " " + state
-            self.__cProc.stdin.write(cmd)
-    # def __Init_Rate(self):
-
-    #   cmd = CHANGE + " " + BILLING_RATE + " " + str(INIT_RATE)
-    #   print cmd
-    #   self.__cProc.stdin.write(cmd)
+        elif SEARCH_USER_ID in line:
+            self.__user_id = line.split(',')[1]
 
 
-    # def __Check_Reservation(self):
+    def Free_Sensor_State(self):
+        self.__light_state = FREE
+        cmd = "change " + LIGHT_STATE + " " + FREE
+        self.__cProc.stdin.write(cmd)
 
-    #   cmd = DUMP+" "+PARK_STATE+"\n"
-    #   self.__cProc.stdin.write(cmd)
-    #   tmp_output = self.__stdout.readline(0.01)
-    #   while not tmp_output.isspace():
-    #       if tmp_output.find(RESERVED)>=0:
-    #           self.__sense.clear(255,165,0)
-    #           self.__reserved=True
-    #           break
-    #       tmp_output = self.__stdout.readline(0.01)
+    def Load_New_User(self, new_user_id):
+        for p in self.__persons.get_owners():
+            # print(p.user_location_x)
+            if new_user_id == p.user_id: # our guy is found
+                self.__user_id = new_user_id
+                cmd = "change " + USER_ID + " " + new_user_id
+                self.__cProc.stdin.write(cmd)
 
+                self.__user_type = p.user_type
+                cmd = "change " + USER_TYPE + " " + p.user_type
+                self.__cProc.stdin.write(cmd)
+
+                self.__light_color = p.light_color
+                cmd = "change " + LIGHT_COLOR + " " + p.light_color
+                self.__cProc.stdin.write(cmd)
+
+                self.__low_light = p.low_light
+                cmd = "change " + LOW_LIGHT + " " + p.low_light
+                self.__cProc.stdin.write(cmd)
+
+                self.__light_state = USED
+                cmd = "change " + LIGHT_STATE + " " + USED
+                self.__cProc.stdin.write(cmd)
+
+                colors = self.__light_color[1:-1].split(',')
+                self.__light.low_light(self.__low_light)                
+                self.__light.change_color(colors[0], colors[1], colors[2])
+                break
 
     def Kill_Client_Process(self):
-        output = subprocess.check_output(["pkill","lwm2mclient"])
+        output = subprocess.check_output(["pkill","light_lwm2mclient"])
         print output
