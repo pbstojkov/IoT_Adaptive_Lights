@@ -1,4 +1,5 @@
-import urllib.request
+# import urllib.request
+from urllib2 import urlopen
 import json
 
 class Persons:
@@ -8,7 +9,7 @@ class Persons:
 
     def load_json(self, url):
         # url1 = 'https://iot-test.000webhostapp.com/OwnershipPriority.json'
-        response = urllib.request.urlopen(url)
+        response = urlopen(url)
         data = response.read()
         text = data.decode('utf-8')
         for p in json.loads(text):
