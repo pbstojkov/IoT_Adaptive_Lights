@@ -8,8 +8,8 @@ import ownership
 import light
 # from Error import *
 
-sensor_clientPath = "./sensor_lwm2mclient"
-light_clientPath = "./light_lwm2mclient"
+sensor_clientPath = "general/sensor_lwm2mclient"
+light_clientPath = "general/light_lwm2mclient"
 
 #Constants
 INIT_RATE = 0.01
@@ -49,11 +49,11 @@ OWNERSHIP_PRIORITY = "/10250/0/12"
 LIGHT_BEHAVIOR = "/10250/0/13"
 
 SENSOR_STATE = "/10350/0/2"
-USER_ID = "/10350/0/3"
-GROUP_NO = "/10350/0/4"
-LOCATION_X = "/10350/0/5"
-LOCATION_Y = "/10350/0/6"
-ROOM_ID = "/10350/0/7"
+SENSOR_USER_ID = "/10350/0/3"
+SENSOR_GROUP_NO = "/10350/0/4"
+SENSOR_LOCATION_X = "/10350/0/5"
+SENSOR_LOCATION_Y = "/10350/0/6"
+SENSOR_ROOM_ID = "/10350/0/7"
 
 
 class Wakaama_Sensor():
@@ -130,7 +130,7 @@ class Wakaama_Sensor():
 
 
 
-class Wakaama_Light():
+class Wakaama_Light:
 
     def __init__(self, host):
         self.__host = host
