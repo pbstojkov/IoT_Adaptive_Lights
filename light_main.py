@@ -3,7 +3,8 @@ from light import *
 from general import * # AvahiDiscovery, WakaamaProc, ownership
 # from multiprocessing import Process
 # import thread, time
-
+from general import AvahiDiscovery
+from light import client
 
 if __name__ == "__main__":
     ROOM = 1
