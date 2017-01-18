@@ -318,8 +318,21 @@ class Wakaama_Light:
         self.__light_state = FREE
         cmd = "change " + LIGHT_STATE + " " + FREE
         self.__cProc.stdin.write(cmd)
+
+        if room_empty:
+            off = '(0,0,0)'
+            colors = off[1:-1].split(',')
+            self.__light.change_color(colors[0], colors[1], colors[2])
+            self.__light_color = off
+        else:
+            dim  = '(250,200,100)'
+            colors = dim[1:-1].split(',')
+            self.__light.change_color(colors[0], colors[1], colors[2])
+            self.__light_color = dim
         # todo FIX
         # todo do something if room is not empty!!!
+        cmd = "change " + LIGHT_COLOR + " " + self.__light_color
+        self.__cProc.stdin.write(cmd)
 
     def Load_New_User(self, new_user_id):
         for p in self.__persons.get_owners():
