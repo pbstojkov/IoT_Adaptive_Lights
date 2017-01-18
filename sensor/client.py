@@ -6,6 +6,7 @@ from picamera.array import PiRGBArray
 from picamera import PiCamera
 from collections import deque
 from functools import reduce
+from general.WakaamaProc import *
 import math
 import argparse
 import time
@@ -41,11 +42,25 @@ def add_to_window(element):
     q.append(element)
     q.popleft()
 
+    return sliding_check()
+    # if tmp_state is not None:
+    #     if tmp_state != self.sensor_state:
+    #         self.sensor_state = tmp_state
+    #         return True
+    # return False
+
+# def sliding_check():
+#     if sliding_average(q) > 0.5:
+#         return "OCCUPIED"
+#     else:
+#         return "FREE"
 def sliding_check():
-    if sliding_average(q) > 0.5:
+    if sliding_average(q) > 0.6:
         return "OCCUPIED"
-    else:
+    elif sliding_average(q) < 0.4:
         return "FREE"
+    else:
+        return None
 
 #starts session with broker and publish the message given
 class pahoHandler:
@@ -54,7 +69,7 @@ class pahoHandler:
         # self.__broker_address = "iot.eclipse.org"
         self.client = mqtt.Client("P1")
         self.loop_flag_connected = False
-        self.sensor_state = 'OCCUPIED'
+        self.sensor_state =  'FREE'  # 'OCCUPIED'
         self.launch_thread = True
         sliding_init()
 
@@ -82,6 +97,9 @@ class pahoHandler:
         print("Subscribed: " + str(mid) + " " + str(granted_qos))
 
     def connect_to_broker(self, broker_address, port, keepalive=60):
+        #start Wakama section
+        self.waka_client = Wakaama_Sensor(broker_address)
+
         # client = mqtt.Client("P1")
         self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message
@@ -101,6 +119,8 @@ class pahoHandler:
 
         # self.client.subscribe("house/bulbs/bulb1")
 
+        # thread running
+        thread.start_new_thread(self.waka_client.Main_Client_Process, ())
 
         # while True:
         #     self.publish('Free')
@@ -126,7 +146,11 @@ class pahoHandler:
             # print(sliding_average(q))
             # print(q)
             # print(sliding_check())
-            self.sensor_state = sliding_check()
+
+            # tmp_state = sliding_check()
+            # if tmp_state is not None:
+            #     self.sensor_state = tmp_state
+            
             self.publish(self.sensor_state)
             # if window_ready():
             time.sleep(5)
@@ -139,14 +163,20 @@ class pahoHandler:
         if num_faces_detected > 0:
             # self.sensor_state = 'OCCUPIED'
             # print(num_faces_detected)
-            add_to_window(1)
+            add_state = 1
+            # add_to_window(1)
         else:
             # print(num_faces_detected)
             # self.sensor_state = 'FREE'
-            add_to_window(0)
+            add_state = 1
+            # add_to_window(0)
 
-        #if the average of queue higher than .6 or lower .4 publish value
-
+        result = add_to_window(add_state)
+        if result is not None:
+            if result != self.sensor_state:
+                self.sensor_state = result
+                self.publish(result)
+                self.waka_client.Set_Sensor_State(result)
 
         # time.sleep(5)
 

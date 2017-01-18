@@ -424,10 +424,12 @@ class Wakaama_Light:
         return self.__persons.get_owners()
 
 
-if __name__ == "__main__":
-    import AvahiDiscovery
-    ROOM = 1
-    BROKER_ADDRESS = AvahiDiscovery.find_broker(ROOM)
+# if __name__ == "__main__":
+#     import AvahiDiscovery
+#     ROOM = 1
+#     BROKER_ADDRESS = AvahiDiscovery.find_broker(ROOM)
+#     sensor_clientPath = "./sensor_lwm2mclient"
+#     light_clientPath = "./light_lwm2mclient"
 
-    wc = Wakaama_Light(BROKER_ADDRESS)
-    wc.Main_Client_Process()
+#     wc = Wakaama_Light(BROKER_ADDRESS)
+#     wc.Main_Client_Process()
