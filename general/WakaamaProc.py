@@ -86,12 +86,54 @@ class Wakaama_Sensor():
         self.__location_y = 0.0
         self.__room_id = ""
 
+        self.__received_bytes_numb = 0
+        self.__accumulated_line = ""
+        self.__is_write_line = None
+
+
+    def __Parse_Part_Line(self, line):
+        print "Line: [" + line + "]"
+        if "bytes received" in line:
+            self.__received_bytes_numb = int(line.split(" ")[0])
+            print "Waiting for " + str(self.__received_bytes_numb) + " bytes."
+        elif self.__received_bytes_numb > 0:
+            if self.__is_write_line is None:
+                tmp = line.split("  ")[0].split(" ")[1]
+                if tmp == "03":
+                    self.__is_write_line = True
+                else:
+                    self.__is_write_line = False
+
+            data = line.split("  ")[-1][:-1]
+            if ' ' in data[:1]:
+                data = data.replace(' ', '')
+
+            self.__accumulated_line += data
+            print "Data: " + data
+            print "len: + " + str(len(data))
+            # print type(data)
+            try:
+                self.__received_bytes_numb -= len(data)
+            except Exception as e:
+                self.__received_bytes_numb = 0
+                return False
+            
+            if self.__received_bytes_numb == 0:
+                if self.__is_write_line:
+                    self.__is_write_line = None
+                    return True
+                else:
+                    self.__is_write_line = None
+                    return False
+                # return True
+        return False
 
     def __Start_Client_Process(self):
         print self.__host
         
         try:
-            self.__cProc = subprocess.Popen([sensor_clientPath,"-h",str(self.__host)],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
+            # self.__cProc = subprocess.Popen([sensor_clientPath,"-h",str(self.__host)],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
+            self.__cProc = subprocess.Popen([sensor_clientPath, "-4" , "-h", self.__host], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE, universal_newlines=True)
         except:
             return False
 
@@ -101,6 +143,11 @@ class Wakaama_Sensor():
         time.sleep(2)
         return True
 
+    def __WTF(self):
+        for stdout_line in iter(self.__cProc.stdout.readline, ""):
+            yield stdout_line
+
+
     def Main_Client_Process(self):
 
         if not self.__Start_Client_Process():
@@ -108,8 +155,15 @@ class Wakaama_Sensor():
 
         # while not self.__Exit:
         # for line in iter(self.__stdout.readline, ""):
-        for line in iter(self.__cProc.stdout.readline, ""):           
-            self.__Read_Input_line(line)
+        # for line in iter(self.__cProc.stdout.readline, ""):           
+        #     self.__Read_Input_line(line)
+
+        for line in self.__WTF():
+            # bs = self.__cProc.stdout.readline(100)
+            # print "bs = {" + bs + "}"
+            if self.__Parse_Part_Line(line):
+                self.__Read_Input_line(self.__accumulated_line)
+                self.__accumulated_line = ""
 
         self.__cProc.stdout.close()
         return_code = self.__cProc.wait()
@@ -329,8 +383,7 @@ class Wakaama_Light:
             colors = dim[1:-1].split(',')
             self.__light.change_color(colors[0], colors[1], colors[2])
             self.__light_color = dim
-        # todo FIX
-        # todo do something if room is not empty!!!
+
         cmd = "change " + LIGHT_COLOR + " " + self.__light_color
         self.__cProc.stdin.write(cmd)
 
