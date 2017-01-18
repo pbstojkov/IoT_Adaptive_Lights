@@ -6,7 +6,9 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 # from picamera import PiCamera
 from collections import deque
 from functools import reduce
-from general import WakaamaProc
+# from general import WakaamaProc
+from general.WakaamaProc import *
+from general import ownership
 import math
 import argparse
 import time
@@ -15,6 +17,7 @@ import paho.mqtt.client as mqtt
 import time
 import thread
 import re
+
 
 q = deque()
 Q_SIZE = 10
@@ -58,7 +61,8 @@ class pahoHandler:
         self.sensor_state = 'OCCUPIED'
         self.launch_thread = True
         sliding_init()
-        self.occupied_workers = []
+        self.occupied_workers = ['Sensor-Device-B-1']
+        self.run_once_flag = True
 
 
     # The callback for when the client receives a CONNACK response from the server.
@@ -77,9 +81,46 @@ class pahoHandler:
         sender_msg = str(message.payload.decode("utf-8"))
         if sender_msg == 'FREE' and sender_device_id in self.occupied_workers:
             self.occupied_workers.remove(sender_device_id)
+            self.state_logic()
         elif sender_msg == 'OCCUPIED' and sender_device_id not in self.occupied_workers:
             self.occupied_workers.append(sender_device_id)
-        print('WORKERS LINE UP,  ', self.occupied_workers)
+            self.state_logic()
+        print('WORKERS____,  ', self.occupied_workers)
+
+    def state_logic(self):
+        # while self.run_once_flag:
+        print('STATE LOGIC ENTERED')
+        person_found = False
+        user = None
+        # print(self.waka_client.get_persons())
+        for p in self.waka_client.get_persons():
+            if p.user_type == "USER1" and p.sensor_id in self.occupied_workers:
+                user = p.user_id
+                person_found = True
+                break
+
+        if not person_found:
+            for p in self.waka_client.get_persons():
+                if p.user_type == "USER2" and p.sensor_id in self.occupied_workers:
+                    user = p.user_id
+                    person_found = True
+                    break
+
+        if not person_found:
+            for p in self.waka_client.get_persons():
+                if p.user_type == "USER3" and p.sensor_id in self.occupied_workers:
+                    user = p.user_id
+                    person_found = True
+                    break
+
+        if person_found:
+            self.waka_client.Load_New_User(user)
+        else:
+            if len(self.occupied_workers) > 0:
+                self.waka_client.Free_Sensor_State(room_empty=False)
+            else:
+                self.waka_client.Free_Sensor_State(room_empty=True)
+                                # self.run_once_flag = not self.run_once_flag
 
     def send_message(self):
         print('Sending message:')
@@ -92,6 +133,9 @@ class pahoHandler:
         print("Subscribed: " + str(mid) + " " + str(granted_qos))
 
     def connect_to_broker(self, broker_address, port, keepalive=60):
+        #start Wakama section
+        self.waka_client = Wakaama_Light(broker_address)
+
         # client = mqtt.Client("P1")
         self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message
@@ -111,6 +155,11 @@ class pahoHandler:
 
         # self.client.subscribe("house/bulbs/bulb1")
         self.subscribe()
+
+
+        #todo thread running
+        thread.start_new_thread(self.waka_client.Main_Client_Process, ())
+
 
         while True:
             time.sleep(5)

@@ -8,8 +8,8 @@ from ownership import *
 from light import *
 # from Error import *
 
-sensor_clientPath = "./sensor_lwm2mclient"
-light_clientPath = "./light_lwm2mclient"
+sensor_clientPath = "general/sensor_lwm2mclient"
+light_clientPath = "general/light_lwm2mclient"
 
 #Constants
 INIT_RATE = 0.01
@@ -314,10 +314,12 @@ class Wakaama_Light:
             self.__user_id = line.split("..")[-1] #line.split(',')[1]
 
 
-    def Free_Sensor_State(self):
+    def Free_Sensor_State(self, room_empty):
         self.__light_state = FREE
         cmd = "change " + LIGHT_STATE + " " + FREE
         self.__cProc.stdin.write(cmd)
+        # todo FIX
+        # todo do something if room is not empty!!!
 
     def Load_New_User(self, new_user_id):
         for p in self.__persons.get_owners():
@@ -336,7 +338,7 @@ class Wakaama_Light:
                 self.__cProc.stdin.write(cmd)
 
                 self.__low_light = p.low_light
-                cmd = "change " + LOW_LIGHT + " " + p.low_light
+                cmd = "change " + LOW_LIGHT + " " + str(p.low_light)
                 self.__cProc.stdin.write(cmd)
 
                 self.__light_state = USED
@@ -353,7 +355,7 @@ class Wakaama_Light:
         print output
 
     def get_persons(self):
-        return self.__persons
+        return self.__persons.get_owners()
 
 
 if __name__ == "__main__":
