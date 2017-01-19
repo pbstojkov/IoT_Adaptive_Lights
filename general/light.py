@@ -2,7 +2,7 @@ from sense_hat import SenseHat
 
 class Light:
     def __init__(self):
-        self.X = [255, 0, 0]  # Red
+        self.X = [0, 0, 0]  # Red
         self.O = [255, 255, 255]  # White
         self.sketch = [
             self.X, self.X, self.X, self.X, self.X, self.X, self.X, self.X,
@@ -36,7 +36,7 @@ class Light:
         self.sense.low_light = intensity
 
 my_light = Light()
-my_light.change_color(255, 0, 0)
+my_light.change_color(0, 0, 0)
 
 
 

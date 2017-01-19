@@ -1,0 +1,54 @@
+[{
+ "user_type": "USER1",
+ "user_id": "Office-Worker-1",
+ "sensor_id": "Sensor-Device-31-1",
+ "light_color": "(255, 255, 255)",
+ "low_light": false,
+ "user_location_x": 2,
+ "user_location_y": 1
+},
+{
+ "user_type": "USER2",
+ "user_id": "Office-Worker-3",
+ "sensor_id": "Sensor-Device-D-1",
+ "light_color": "(255, 0, 0)",
+ "low_light": true,
+ "user_location_x": 4,
+ "user_location_y": 1
+},
+{
+ "user_type": "USER3",
+ "user_id": "Office-Worker-20",
+ "sensor_id": "Sensor-Device-B-1",
+ "light_color": "(0, 0, 255)",
+ "low_light": false,
+ "user_location_x": 2,
+ "user_location_y": 3
+},
+{
+ "user_type": "USER3",
+ "user_id": "Office-Worker-25",
+ "sensor_id": "Sensor-Device-C-1",
+ "light_color": "(0, 0, 255)",
+ "low_light": false,
+ "user_location_x": 4,
+ "user_location_y": 3
+},
+{
+ "user_type": "USER3",
+ "user_id": "Office-Worker-40",
+ "sensor_id": "Sensor-Device-C-1",
+ "light_color": "(0, 0, 0)",
+ "low_light": false,
+ "user_location_x": 2,
+ "user_location_y": 5
+},
+{
+ "user_type": "USER3",
+ "user_id": "Office-Worker-30",
+ "sensor_id": "Sensor-Device-C-1",
+ "light_color": "(0, 255, 255)",
+ "low_light": true,
+ "user_location_x": 4,
+ "user_location_y": 5
+}]

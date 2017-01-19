@@ -7,6 +7,15 @@ class Persons:
         self.dict_json = None
         self.person_list = []
 
+    def load_json_from_file(self):
+        with open('OwnershipPriority.json') as json_data:
+            data = json.load(json_data)
+            # print(d)
+            for p in data:
+                self.person_list.append(
+                    Person(p['user_type'], p['user_id'], p['sensor_id'], p['light_color'], p['low_light'],
+                           p['user_location_x'], p['user_location_y']))
+
     def load_json(self, url):
         # url1 = 'https://iot-test.000webhostapp.com/OwnershipPriority.json'
         response = urlopen(url)
@@ -58,8 +67,9 @@ class Person:
 
 
 #Example
-# if __name__ == '__main__':
-#     owner = Persons()
+#if __name__ == '__main__':
+    # owner = Persons()
+    # owner.load_json_from_file()
 #     owner.load_json('https://iot-test.000webhostapp.com/OwnershipPriority.json')
 #     for p in owner.get_owners():
 #         print(type(p.low_light))

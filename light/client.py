@@ -58,10 +58,10 @@ class pahoHandler:
         self.__subscribe_text = 'TUE/Room-1/Sensor/+/State'
         self.client = mqtt.Client("P_Light")
         self.loop_flag_connected = False
-        self.sensor_state = 'OCCUPIED'
+        # self.sensor_state = 'OCCUPIED'
         self.launch_thread = True
         sliding_init()
-        self.occupied_workers = ['Sensor-Device-B-1']
+        self.occupied_workers = [] #['Sensor-Device-B-1']
         self.run_once_flag = True
 
 
@@ -127,7 +127,7 @@ class pahoHandler:
         # client1.publish("TUE/Room-1/Sensor/Sensor-Device-1-1/State", "Occupied")
 
     def on_log(self, client, userdata, level, buf):
-        print("log11: ", buf)
+        print("log1: ", buf)
 
     def on_subscribe(self, mqttc, obj, mid, granted_qos):
         print("Subscribed: " + str(mid) + " " + str(granted_qos))

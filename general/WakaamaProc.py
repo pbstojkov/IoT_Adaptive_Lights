@@ -94,8 +94,11 @@ class Wakaama_Sensor():
     def __Parse_Part_Line(self, line):
         print "Line: [" + line + "]"
         if "bytes received" in line:
-            self.__received_bytes_numb = int(line.split(" ")[0])
-            print "Waiting for " + str(self.__received_bytes_numb) + " bytes."
+            words = line.split(" ")
+            bytes = int(words[words.index("bytes") - 1])
+            self.__received_bytes_numb = bytes
+            #self.__received_bytes_numb = int(line.split(" ")[0])
+            # print "Waiting for " + str(self.__received_bytes_numb) + " bytes."
         elif self.__received_bytes_numb > 0:
             if self.__is_write_line is None:
                 tmp = line.split("  ")[0].split(" ")[1]
@@ -109,8 +112,8 @@ class Wakaama_Sensor():
                 data = data.replace(' ', '')
 
             self.__accumulated_line += data
-            print "Data: " + data
-            print "len: + " + str(len(data))
+            # print "Data: " + data
+            # print "len: + " + str(len(data))
             # print type(data)
             try:
                 self.__received_bytes_numb -= len(data)
@@ -160,7 +163,7 @@ class Wakaama_Sensor():
 
         for line in self.__WTF():
             # bs = self.__cProc.stdout.readline(100)
-            # print "bs = {" + bs + "}"
+            print "line = [" + line[:-1] + "]"
             if self.__Parse_Part_Line(line):
                 self.__Read_Input_line(self.__accumulated_line)
                 self.__accumulated_line = ""
@@ -172,19 +175,19 @@ class Wakaama_Sensor():
 
     def __Read_Input_line(self, line):
         if SEARCH_SENSOR_STATE in line:
-            self.__sensor_state = line.split("..")[-1] #line.split(',')[1]
+            self.__sensor_state = line.split(".")[-1] #line.split(',')[1]
 
         elif SEARCH_SENSOR_ROOM_ID in line:
-            self.__room_id = line.split("..")[-1] #line.split(',')[1]
+            self.__room_id = line.split(".")[-1] #line.split(',')[1]
 
         elif SEARCH_SENSOR_LOCATION_Y in line:
-            self.__location_y = float(line.split("..")[-1]) #line.split(',')[1])
+            self.__location_y = float(line.split(".")[-1]) #line.split(',')[1])
 
         elif SEARCH_SENSOR_LOCATION_X in line:
-            self.__location_x = float(line.split("..")[-1]) #line.split(',')[1])
+            self.__location_x = float(line.split(".")[-1]) #line.split(',')[1])
 
         elif SEARCH_SENSOR_GROUP_NO in line:
-            self.__group_no = int(line.split("..")[-1]) #line.split(',')[1])
+            self.__group_no = int(line.split(".")[-1]) #line.split(',')[1])
 
     def Set_Sensor_State(self, state):
         self.__sensor_state = state 
@@ -223,17 +226,28 @@ class Wakaama_Light:
         self.__light = Light()
         self.__persons = Persons() 
         #todo: delete below line, it is just a test !
-        self.__persons.load_json('https://iot-test.000webhostapp.com/OwnershipPriority.json')
+        #self.__persons.load_json('https://iot-test.000webhostapp.com/OwnershipPriority.json')
+        # try:
+        #     self.__persons.load_json_from_file('OwnershipPriority.json')
+        # except Exception as e:
+        #     print "no json loaded"
 
         self.__received_bytes_numb = 0
         self.__accumulated_line = ""
         self.__is_write_line = None
 
     def __Parse_Part_Line(self, line):
-        print "Line: [" + line + "]"
+        #print "Line: [" + line + "]"
         if "bytes received" in line:
-            self.__received_bytes_numb = int(line.split(" ")[0])
-            print "Waiting for " + str(self.__received_bytes_numb) + " bytes."
+            words = line.split(" ")
+            try:
+                bytes = int(words[words.index("bytes") - 1])
+            except:
+                bytes = 0
+
+            self.__received_bytes_numb = bytes
+            #self.__received_bytes_numb = int(line.split(" ")[0])
+            #print "Waiting for " + str(self.__received_bytes_numb) + " bytes."
         elif self.__received_bytes_numb > 0:
             if self.__is_write_line is None:
                 tmp = line.split("  ")[0].split(" ")[1]
@@ -247,8 +261,8 @@ class Wakaama_Light:
                 data = data.replace(' ', '')
 
             self.__accumulated_line += data
-            print "Data: " + data
-            print "len: + " + str(len(data))
+            #print "Data: " + data
+            #print "len: + " + str(len(data))
             # print type(data)
             try:
                 self.__received_bytes_numb -= len(data)
@@ -304,12 +318,11 @@ class Wakaama_Light:
 
         for line in self.__WTF():
             # bs = self.__cProc.stdout.readline(100)
-            # print "bs = {" + bs + "}"
+            print "line = [" + line[:-1] + "]"
             if self.__Parse_Part_Line(line):
                 self.__Read_Input_line(self.__accumulated_line)
                 self.__accumulated_line = ""
 
-        print("WTF!?!?!?")
         # self.__cProc.stdout.close()
         return_code = self.__cProc.wait()
         if return_code:
@@ -318,56 +331,90 @@ class Wakaama_Light:
             # raise subprocess.CalledProcessError(return_code, cmd)
 
     def __Read_Input_line(self, line):
-        print "reading .. [" + line + "]"
+        print "reading [" + line + "]"
         if SEARCH_LIGHT_COLOR in line:
             # colors = line.split(',')
-            colors_str = line.split("..")[-1]
+            colors_str = line.split(".")[-1]
+            # print "LINE :: [" + line + "]"
+            # print "colorstr : [" + colors_str + "]"
             colors = colors_str[1:-1].split(',')
+            colors[0] = colors[0].replace('(', '')
+            colors[2] = colors[2].replace(')', '')
+            #colors = colors_str[1:-1].split(',')
             self.__light.change_color(colors[0], colors[1], colors[2])
 
             self.__light_color = colors_str
             
             self.__persons.find_user_id_change_values(self.__user_id, light_color=self.__light_color)
 
+            cmd = "change " + LIGHT_COLOR + " " + self.__light_color
+            self.__cProc.stdin.write(cmd)
+
         elif SEARCH_LOW_LIGHT in line:
             # ll = line.split(',')[1]
-            ll = line.split("..")[-1]
-            if "True" in ll:
+            ll = line.split(".")[-1]
+            # print "ll line [" + line + "]"
+            # print "low light :[" + ll + ']'
+            if "true" in ll:
                 self.__low_light = True
-            elif "False" in ll:
+            elif "false" in ll:
                 self.__low_light = False
 
             self.__light.low_light(self.__low_light)
 
             self.__persons.find_user_id_change_values(self.__user_id, low_light=self.__low_light)
 
+            cmd = "change " + LOW_LIGHT + " " + str(self.__low_light)
+            self.__cProc.stdin.write(cmd)
+
         elif SEARCH_OWNERSHIP in line:
             # url_ownership = line.split(',')[1]
-            url_ownership = line.split("..")[-1]
+            url_ownership = line.split(".")[-1]
             self.__persons.load_json(url_ownership)
 
         elif SEARCH_ROOM_ID in line:
-            self.__room_id = line.split("..")[-1] #line.split(',')[1]
+            self.__room_id = line.split(".")[-1] #line.split(',')[1]
+
+            cmd = "change " + ROOM_ID + " " + self.__room_id
+            self.__cProc.stdin.write(cmd)
 
         elif SEARCH_LOCATION_Y in line:
-            self.__location_y = float(line.split("..")[-1]) #line.split(',')[1])
+            self.__location_y = float(line.split(".")[-1]) #line.split(',')[1])
+
+            cmd = "change " + LOCATION_Y + " " + str(self.__location_y)
+            self.__cProc.stdin.write(cmd)
 
         elif SEARCH_LOCATION_X in line:
-            self.__location_x = float(line.split("..")[-1]) #line.split(',')[1])
+            self.__location_x = float(line.split(".")[-1]) #line.split(',')[1])
+
+            cmd = "change " + LOCATION_X + " " + str(self.__location_x)
+            self.__cProc.stdin.write(cmd)
 
         elif SEARCH_GROUP_NO in line:
-            self.__group_no = int(line.split("..")[-1]) #line.split(',')[1])
+            self.__group_no = int(line.split(".")[-1]) #line.split(',')[1])
+
+            cmd = "change " + GROUP_NO + " " + str(self.__group_no)
+            self.__cProc.stdin.write(cmd)
 
         elif SEARCH_LIGHT_STATE in line:
-            self.__light_state = line.split("..")[-1] #line.split(',')[1]
+            self.__light_state = line.split(".")[-1] #line.split(',')[1]
+
+            cmd = "change " + LIGHT_STATE + " " + self.__light_state
+            self.__cProc.stdin.write(cmd)
 
         elif SEARCH_USER_TYPE in line:
-            self.__user_type = line.split("..")[-1] #line.split(',')[1]
+            self.__user_type = line.split(".")[-1] #line.split(',')[1]
+
+            cmd = "change " + USER_TYPE + " " + self.__user_type
+            self.__cProc.stdin.write(cmd)
 
         elif SEARCH_USER_ID in line:
-            self.__user_id = line.split("..")[-1] #line.split(',')[1]
+            self.__user_id = line.split(".")[-1] #line.split(',')[1]
 
+            cmd = "change " + USER_ID + " " + self.__user_id
+            self.__cProc.stdin.write(cmd)
 
+    
     def Free_Sensor_State(self, room_empty):
         self.__light_state = FREE
         cmd = "change " + LIGHT_STATE + " " + FREE
