@@ -168,7 +168,7 @@ class pahoHandler:
         else:
             # print(num_faces_detected)
             # self.sensor_state = 'FREE'
-            add_state = 1
+            add_state = 0
             # add_to_window(0)
 
         result = add_to_window(add_state)
@@ -244,7 +244,7 @@ class pahoHandler:
 
             # if the 'q' key is pressed, stop the loop
             if cv2.waitKey(1) & 0xFF == ord("q"):
-                break
+               break
 
 
 # if __name__ == '__main__':

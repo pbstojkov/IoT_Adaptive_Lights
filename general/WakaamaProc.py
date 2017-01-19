@@ -5,7 +5,7 @@ from sense_hat import SenseHat
 from evdev import InputDevice, list_devices, ecodes
 # from nbstreamreader import NonBlockingStreamReader as NBSR
 from ownership import *
-from light import *
+#from light import *
 # from Error import *
 
 sensor_clientPath = "general/sensor_lwm2mclient"
@@ -94,7 +94,9 @@ class Wakaama_Sensor():
     def __Parse_Part_Line(self, line):
         print "Line: [" + line + "]"
         if "bytes received" in line:
-            self.__received_bytes_numb = int(line.split(" ")[0])
+            words = line.split(" ")             
+            bytes = int(words[words.index("bytes") - 1])                                                         
+            self.__received_bytes_numb = bytes
             print "Waiting for " + str(self.__received_bytes_numb) + " bytes."
         elif self.__received_bytes_numb > 0:
             if self.__is_write_line is None:
@@ -165,26 +167,42 @@ class Wakaama_Sensor():
                 self.__Read_Input_line(self.__accumulated_line)
                 self.__accumulated_line = ""
 
-        self.__cProc.stdout.close()
+        #self.__cProc.stdout.close()
         return_code = self.__cProc.wait()
         if return_code:
-            raise subprocess.CalledProcessError(return_code, cmd)
+            print "return code: " + str(return_code)
+            #raise subprocess.CalledProcessError(return_code, cmd)
 
     def __Read_Input_line(self, line):
         if SEARCH_SENSOR_STATE in line:
-            self.__sensor_state = line.split("..")[-1] #line.split(',')[1]
+            self.__sensor_state = line.split(".")[-1] #line.split(',')[1]
+
+            cmd = "change " + SENSOR_STATE + " " + self.__sensor_state
+            self.__cProc.stdin.write(cmd)
 
         elif SEARCH_SENSOR_ROOM_ID in line:
-            self.__room_id = line.split("..")[-1] #line.split(',')[1]
+            self.__room_id = line.split(".")[-1] #line.split(',')[1]
+
+            cmd = "change " + SENSOR_ROOM_ID + " " + self.__room_id
+            self.__cProc.stdin.write(cmd)
 
         elif SEARCH_SENSOR_LOCATION_Y in line:
-            self.__location_y = float(line.split("..")[-1]) #line.split(',')[1])
+            self.__location_y = float(line.split(".")[-1]) #line.split(',')[1])
+
+            cmd = "change " + SENSOR_LOCATION_Y + " " + str(self.__location_y)
+            self.__cProc.stdin.write(cmd)
 
         elif SEARCH_SENSOR_LOCATION_X in line:
-            self.__location_x = float(line.split("..")[-1]) #line.split(',')[1])
+            self.__location_x = float(line.split(".")[-1]) #line.split(',')[1])
+
+            cmd = "change " + SENSOR_LOCATION_X + " " + str(self.__location_x)
+            self.__cProc.stdin.write(cmd)
 
         elif SEARCH_SENSOR_GROUP_NO in line:
-            self.__group_no = int(line.split("..")[-1]) #line.split(',')[1])
+            self.__group_no = int(line.split(".")[-1]) #line.split(',')[1])
+
+            cmd = "change " + SENSOR_GROUP_NO + " " + str(self.__group_no)
+            self.__cProc.stdin.write(cmd)
 
     def Set_Sensor_State(self, state):
         self.__sensor_state = state 
@@ -232,7 +250,9 @@ class Wakaama_Light:
     def __Parse_Part_Line(self, line):
         print "Line: [" + line + "]"
         if "bytes received" in line:
-            self.__received_bytes_numb = int(line.split(" ")[0])
+            words = line.split(" ")
+            bytes = int(words[words.index("bytes") - 1])
+            self.__received_bytes_numb = bytes
             print "Waiting for " + str(self.__received_bytes_numb) + " bytes."
         elif self.__received_bytes_numb > 0:
             if self.__is_write_line is None:
@@ -318,10 +338,10 @@ class Wakaama_Light:
             # raise subprocess.CalledProcessError(return_code, cmd)
 
     def __Read_Input_line(self, line):
-        print "reading .. [" + line + "]"
+        print "reading . [" + line + "]"
         if SEARCH_LIGHT_COLOR in line:
             # colors = line.split(',')
-            colors_str = line.split("..")[-1]
+            colors_str = line.split(".")[-1]
             colors = colors_str[1:-1].split(',')
             self.__light.change_color(colors[0], colors[1], colors[2])
 
@@ -331,7 +351,7 @@ class Wakaama_Light:
 
         elif SEARCH_LOW_LIGHT in line:
             # ll = line.split(',')[1]
-            ll = line.split("..")[-1]
+            ll = line.split(".")[-1]
             if "True" in ll:
                 self.__low_light = True
             elif "False" in ll:
@@ -343,29 +363,29 @@ class Wakaama_Light:
 
         elif SEARCH_OWNERSHIP in line:
             # url_ownership = line.split(',')[1]
-            url_ownership = line.split("..")[-1]
+            url_ownership = line.split(".")[-1]
             self.__persons.load_json(url_ownership)
 
         elif SEARCH_ROOM_ID in line:
-            self.__room_id = line.split("..")[-1] #line.split(',')[1]
+            self.__room_id = line.split(".")[-1] #line.split(',')[1]
 
         elif SEARCH_LOCATION_Y in line:
-            self.__location_y = float(line.split("..")[-1]) #line.split(',')[1])
+            self.__location_y = float(line.split(".")[-1]) #line.split(',')[1])
 
         elif SEARCH_LOCATION_X in line:
-            self.__location_x = float(line.split("..")[-1]) #line.split(',')[1])
+            self.__location_x = float(line.split(".")[-1]) #line.split(',')[1])
 
         elif SEARCH_GROUP_NO in line:
-            self.__group_no = int(line.split("..")[-1]) #line.split(',')[1])
+            self.__group_no = int(line.split(".")[-1]) #line.split(',')[1])
 
         elif SEARCH_LIGHT_STATE in line:
-            self.__light_state = line.split("..")[-1] #line.split(',')[1]
+            self.__light_state = line.split(".")[-1] #line.split(',')[1]
 
         elif SEARCH_USER_TYPE in line:
-            self.__user_type = line.split("..")[-1] #line.split(',')[1]
+            self.__user_type = line.split(".")[-1] #line.split(',')[1]
 
         elif SEARCH_USER_ID in line:
-            self.__user_id = line.split("..")[-1] #line.split(',')[1]
+            self.__user_id = line.split(".")[-1] #line.split(',')[1]
 
 
     def Free_Sensor_State(self, room_empty):
