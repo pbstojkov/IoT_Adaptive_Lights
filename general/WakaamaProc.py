@@ -165,7 +165,10 @@ class Wakaama_Sensor():
             # bs = self.__cProc.stdout.readline(100)
             print "line = [" + line[:-1] + "]"
             if self.__Parse_Part_Line(line):
-                self.__Read_Input_line(self.__accumulated_line)
+                try:
+                    self.__Read_Input_line(self.__accumulated_line)
+                except:
+                    pass
                 self.__accumulated_line = ""
 
         self.__cProc.stdout.close()
@@ -181,13 +184,13 @@ class Wakaama_Sensor():
             self.__room_id = line.split(".")[-1] #line.split(',')[1]
 
         elif SEARCH_SENSOR_LOCATION_Y in line:
-            self.__location_y = float(line.split(".")[-1]) #line.split(',')[1])
+            self.__location_y = 2.0 #float(line.split(".")[-1]) #line.split(',')[1])
 
         elif SEARCH_SENSOR_LOCATION_X in line:
-            self.__location_x = float(line.split(".")[-1]) #line.split(',')[1])
+            self.__location_x = 2.0 #float(line.split(".")[-1]) #line.split(',')[1])
 
         elif SEARCH_SENSOR_GROUP_NO in line:
-            self.__group_no = int(line.split(".")[-1]) #line.split(',')[1])
+            self.__group_no = 1 #int(line.split(".")[-1]) #line.split(',')[1])
 
     def Set_Sensor_State(self, state):
         self.__sensor_state = state 
@@ -226,7 +229,7 @@ class Wakaama_Light:
         self.__light = Light()
         self.__persons = Persons() 
         #todo: delete below line, it is just a test !
-        #self.__persons.load_json('https://iot-test.000webhostapp.com/OwnershipPriority.json')
+        self.__persons.load_json('https://iot-test.000webhostapp.com/OwnershipPriority.json')
         # try:
         #     self.__persons.load_json_from_file('OwnershipPriority.json')
         # except Exception as e:
@@ -318,9 +321,12 @@ class Wakaama_Light:
 
         for line in self.__WTF():
             # bs = self.__cProc.stdout.readline(100)
-            print "line = [" + line[:-1] + "]"
+            # print "line = [" + line[:-1] + "]"
             if self.__Parse_Part_Line(line):
-                self.__Read_Input_line(self.__accumulated_line)
+                try:
+                    self.__Read_Input_line(self.__accumulated_line)
+                except:
+                    pass
                 self.__accumulated_line = ""
 
         # self.__cProc.stdout.close()
@@ -379,19 +385,19 @@ class Wakaama_Light:
             self.__cProc.stdin.write(cmd)
 
         elif SEARCH_LOCATION_Y in line:
-            self.__location_y = float(line.split(".")[-1]) #line.split(',')[1])
+            self.__location_y = 2.0 #float(line.split(".")[-1]) #line.split(',')[1])
 
             cmd = "change " + LOCATION_Y + " " + str(self.__location_y)
             self.__cProc.stdin.write(cmd)
 
         elif SEARCH_LOCATION_X in line:
-            self.__location_x = float(line.split(".")[-1]) #line.split(',')[1])
+            self.__location_x = 2.0 #float(line.split(".")[-1]) #line.split(',')[1])
 
             cmd = "change " + LOCATION_X + " " + str(self.__location_x)
             self.__cProc.stdin.write(cmd)
 
         elif SEARCH_GROUP_NO in line:
-            self.__group_no = int(line.split(".")[-1]) #line.split(',')[1])
+            self.__group_no = 1 #int(line.split(".")[-1]) #line.split(',')[1])
 
             cmd = "change " + GROUP_NO + " " + str(self.__group_no)
             self.__cProc.stdin.write(cmd)

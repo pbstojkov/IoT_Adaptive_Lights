@@ -17,7 +17,7 @@ import paho.mqtt.client as mqtt
 import time
 import thread
 import re
-
+import datetime
 
 q = deque()
 Q_SIZE = 10
@@ -115,12 +115,16 @@ class pahoHandler:
 
         if person_found:
             self.waka_client.Load_New_User(user)
+            #print("Light has adjusted")
+            #print(datetime.datetime.now())
         else:
             if len(self.occupied_workers) > 0:
                 self.waka_client.Free_Sensor_State(room_empty=False)
             else:
                 self.waka_client.Free_Sensor_State(room_empty=True)
                                 # self.run_once_flag = not self.run_once_flag
+        print("Light has adjusted")
+        print(datetime.datetime.now())
 
     def send_message(self):
         print('Sending message:')
