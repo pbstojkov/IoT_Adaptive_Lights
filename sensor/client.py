@@ -14,6 +14,7 @@ import cv2
 import paho.mqtt.client as mqtt
 import time
 import thread
+import datetime
 
 q = deque()
 Q_SIZE = 10
@@ -175,6 +176,7 @@ class pahoHandler:
         if result is not None:
             if result != self.sensor_state:
                 self.sensor_state = result
+                print(datetime.datetime.now())
                 self.publish(result)
                 self.waka_client.Set_Sensor_State(result)
 
@@ -234,12 +236,12 @@ class pahoHandler:
             #     self.publish('Free')
 
             # loop over the face bounding boxes and draw them
-            for (fX, fY, fW, fH) in faceRects:
-                cv2.rectangle(frameClone, (fX, fY), (fX + fW, fY + fH), (0, 255, 0), 2)
+            # for (fX, fY, fW, fH) in faceRects:
+            #     cv2.rectangle(frameClone, (fX, fY), (fX + fW, fY + fH), (0, 255, 0), 2)
 
             # show our detected faces, then clear the frame in
             # preparation for the next frame
-            cv2.imshow("Face", frameClone)
+            # cv2.imshow("Face", frameClone)
             rawCapture.truncate(0)
 
             # if the 'q' key is pressed, stop the loop

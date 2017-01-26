@@ -92,10 +92,13 @@ class Wakaama_Sensor():
 
 
     def __Parse_Part_Line(self, line):
-        print "Line: [" + line + "]"
+        #print "Line: [" + line + "]"
         if "bytes received" in line:
             words = line.split(" ")             
-            bytes = int(words[words.index("bytes") - 1])                                                         
+            try:
+                bytes = int(words[words.index("bytes") - 1])
+            except:
+                bytes = 0
             self.__received_bytes_numb = bytes
             print "Waiting for " + str(self.__received_bytes_numb) + " bytes."
         elif self.__received_bytes_numb > 0:
@@ -111,8 +114,8 @@ class Wakaama_Sensor():
                 data = data.replace(' ', '')
 
             self.__accumulated_line += data
-            print "Data: " + data
-            print "len: + " + str(len(data))
+            #print "Data: " + data
+            #print "len: + " + str(len(data))
             # print type(data)
             try:
                 self.__received_bytes_numb -= len(data)
@@ -187,19 +190,19 @@ class Wakaama_Sensor():
             self.__cProc.stdin.write(cmd)
 
         elif SEARCH_SENSOR_LOCATION_Y in line:
-            self.__location_y = float(line.split(".")[-1]) #line.split(',')[1])
+            self.__location_y = 2.2 #float(line.split(".")[-1]) #line.split(',')[1])
 
             cmd = "change " + SENSOR_LOCATION_Y + " " + str(self.__location_y)
             self.__cProc.stdin.write(cmd)
 
         elif SEARCH_SENSOR_LOCATION_X in line:
-            self.__location_x = float(line.split(".")[-1]) #line.split(',')[1])
+            self.__location_x = 2.2 #float(line.split(".")[-1]) #line.split(',')[1])
 
             cmd = "change " + SENSOR_LOCATION_X + " " + str(self.__location_x)
             self.__cProc.stdin.write(cmd)
 
         elif SEARCH_SENSOR_GROUP_NO in line:
-            self.__group_no = int(line.split(".")[-1]) #line.split(',')[1])
+            self.__group_no = 2 #int(line.split(".")[-1]) #line.split(',')[1])
 
             cmd = "change " + SENSOR_GROUP_NO + " " + str(self.__group_no)
             self.__cProc.stdin.write(cmd)
@@ -248,7 +251,7 @@ class Wakaama_Light:
         self.__is_write_line = None
 
     def __Parse_Part_Line(self, line):
-        print "Line: [" + line + "]"
+        #print "Line: [" + line + "]"
         if "bytes received" in line:
             words = line.split(" ")
             bytes = int(words[words.index("bytes") - 1])
@@ -267,8 +270,8 @@ class Wakaama_Light:
                 data = data.replace(' ', '')
 
             self.__accumulated_line += data
-            print "Data: " + data
-            print "len: + " + str(len(data))
+            #print "Data: " + data
+            #print "len: + " + str(len(data))
             # print type(data)
             try:
                 self.__received_bytes_numb -= len(data)
